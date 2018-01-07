@@ -120,6 +120,19 @@
 	<available property="svn-available" file="target/site-deploy/.svn"/>
   
 
+  <property name="checkerframework" value="${env.CHECKERFRAMEWORK}" />
+
+  <!-- On Mac/Linux, use the javac shell script; on Windows, use javac.bat -->
+  <condition property="cfJavac" value="javac.bat" else="javac">
+      <os family="windows" />
+  </condition>
+
+  <presetdef name="jsr308.javac">
+    <javac fork="yes" executable="${checkerframework}/checker/bin/${cfJavac}" >
+      <compilerarg value="-version"/>
+      <compilerarg value="-implicit:class"/>
+    </javac>
+  </presetdef>
 
   <!-- Construct compile classpath -->
   <path id="compile.classpath">
@@ -262,7 +275,35 @@
       <fileset dir="${resource.source.dir}" includes="${stem}/lf5/**/*.properties"/>
       <fileset dir="${resource.source.dir}" includes="${stem}/lf5/viewer/images/*"/>
     </copy>
+  </target>
 
+  <target name="check-nullness"
+          description="Check for null pointer dereferences"
+          depends="init, clean">
+    <mkdir dir="${javac.dest}" />
+    <jsr308.javac srcdir="${java.source.dir}"
+                  destdir="${javac.dest}"
+                  includes="${stem}/**/*.java,
+                            ${stem}/xml/XMLLayout.java"
+                  excludes="misc/*, **/UnitTest*.java,
+                            **/StressCategory.java,
+                            **/doc-files/*,
+                            ${stem}/xml/**,
+                            ${stem}/test/serialization/**,
+                            ${stem}/net/SMTPAppender.java,
+                            ${stem}/net/JMS*.java,
+                            ${stem}/jmx/*.java,
+                            ${stem}/or/jms/*.java"
+                  target="${javac.target}"
+                  source="${javac.source}"
+                  includeAntRuntime="${javac.includeAntRuntime}"
+                  includeJavaRuntime="${javac.includeJavaRuntime}"
+                  deprecation="${deprecation}"
+                  debug="on">
+      <compilerarg line="-processor org.checkerframework.checker.nullness.NullnessChecker"/>
+      <compilerarg line="-Xmaxerrs 10000"/>
+      <classpath refid="compile.classpath"/>
+    </jsr308.javac>
   </target>
 
   <target name="build.examples" depends="build.core">

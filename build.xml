@@ -300,6 +300,12 @@
                   includeJavaRuntime="${javac.includeJavaRuntime}"
                   deprecation="${deprecation}"
                   debug="on">
+      <compilerarg line="-version"/>
+      <compilerarg line="-verbose"/>
+      <compilerarg line="-AprintErrorStack"/>
+      <compilerarg line="-AprintAllQualifiers"/>
+      <compilerarg line="-AstubDebug"/>
+      <compilerarg line="-AstubWarnIfNotFound"/>
       <compilerarg line="-processor org.checkerframework.checker.nullness.NullnessChecker"/>
       <compilerarg line="-Xmaxerrs 10000"/>
       <classpath refid="compile.classpath"/>
